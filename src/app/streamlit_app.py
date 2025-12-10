@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
+import pickle
 import joblib
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -692,5 +693,6 @@ if run_button:
 st.markdown("---")
 
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
