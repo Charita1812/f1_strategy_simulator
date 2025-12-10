@@ -1,0 +1,10 @@
+pandas
+numpy
+tqdm
+scikit-learn
+streamlit
+fastf1
+xgboost
+lightgbm
+ortools
+shap
