@@ -7,7 +7,6 @@ import pickle
 import joblib
 from pathlib import Path
 import matplotlib.pyplot as plt
-from file_loader import load_csv, load_pickle
 
 # Paths - adjust if you changed structure
 ROOT = Path(__file__).resolve().parents[2]
@@ -694,6 +693,7 @@ if run_button:
 st.markdown("---")
 
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
 
