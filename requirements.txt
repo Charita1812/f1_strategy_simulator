@@ -1,3 +1,4 @@
+python-3.11.10
 pandas
 numpy
 tqdm
@@ -7,4 +8,5 @@ fastf1
 xgboost
 lightgbm
 ortools
+
 shap
