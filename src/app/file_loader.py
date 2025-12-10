@@ -15,25 +15,20 @@ def extract_if_needed(zip_path: str, extract_to: str):
     return extract_to
 
 
-def load_csv(zip_path: str, filename: str):
-    """
-    Load CSV from a ZIP uploaded to GitHub.
-    """
-    extracted = extract_if_needed(
-        zip_path,
-        os.path.join(os.path.dirname(zip_path), filename)
-    )
-    return pd.read_csv(extracted)
-
 
 def load_pickle(zip_path: str, filename: str):
     """
-    Load pickle model from a ZIP uploaded to GitHub.
+    Load pickle model directly from a ZIP without extracting.
     """
-    extracted = extract_if_needed(
-        zip_path,
-        os.path.join(os.path.dirname(zip_path), filename)
-    )
-    with open(extracted, "rb") as f:
-        return pickle.load(f)
+    with zipfile.ZipFile(zip_path, 'r') as z:
+        with z.open(filename) as f:
+            return pickle.load(BytesIO(f.read()))
+
+def load_csv(zip_path: str, filename: str):
+    """
+    Load CSV directly from a ZIP without extracting.
+    """
+    with zipfile.ZipFile(zip_path, 'r') as z:
+        with z.open(filename) as f:
+            return pd.read_csv(f)
 
