@@ -5,11 +5,20 @@ import os
 import joblib
 from pathlib import Path
 import matplotlib.pyplot as plt
+from file_loader import load_csv, load_pickle
 
 # Paths - adjust if you changed structure
 ROOT = Path(__file__).resolve().parents[2]
 PROCESSED = ROOT / "data" / "processed"
 MODELS_DIR = ROOT / "models"
+# Load ZIPped models
+safety_car_model = load_pickle("models/safety_car_model.zip", "safety_car_model.pkl")
+undercut_model = load_pickle("models/undercut_model.zip", "undercut_model.pkl")
+
+# Load the rest of the models normally
+lap_time_model = pickle.load(open(MODELS_DIR / "lap_time_predictor.pkl", "rb"))
+tyre_wear_model = pickle.load(open(MODELS_DIR / "tyre_wear_predictor.pkl", "rb"))
+pit_window_model = pickle.load(open(MODELS_DIR / "pit_window_model.pkl", "rb"))
 ENGINE_PATH = ROOT / "src" / "simulator" / "strategy_engine.py"
 
 # Ensure engine import works by adding src to sys.path
@@ -463,12 +472,12 @@ st.title("F1 Race Strategy Simulator")
 st.markdown("<p style='text-align: center; color: #666; font-size: 1.1rem; margin-top: -10px;'>Professional Monte Carlo Strategy Analysis</p>", unsafe_allow_html=True)
 
 # Load master data
-master_csv = PROCESSED / "master_lap_by_lap.csv"
-if not master_csv.exists():
-    st.error(f"Missing processed data: {master_csv}")
-    st.stop()
+# Load master data from ZIP
+master = load_csv(
+    zip_path="data/processed/master_lap_by_lap.zip",
+    filename="master_lap_by_lap.csv"
+)
 
-master = pd.read_csv(master_csv)
 
 # Sidebar: choose race / driver / settings
 st.sidebar.header("⚙️ Configuration")
@@ -681,4 +690,5 @@ if run_button:
         st.info("ℹ️ No historical lap data available for this driver and race selection.")
 
 st.markdown("---")
+
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
