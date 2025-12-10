@@ -1,6 +1,4 @@
 import streamlit as st
-import pickle
-import zipfile
 import pandas as pd
 import numpy as np
 import os
@@ -694,4 +692,5 @@ if run_button:
 st.markdown("---")
 
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
