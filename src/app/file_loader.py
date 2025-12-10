@@ -33,4 +33,4 @@ def load_csv(zip_path: str, filename: str):
     """
     with zipfile.ZipFile(zip_path, 'r') as z:
         with z.open(filename) as f:
-            return pd.read_csv(f)
+            return pd.read_csv(f.read())
