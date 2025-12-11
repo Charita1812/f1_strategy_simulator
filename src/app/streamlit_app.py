@@ -498,7 +498,7 @@ joblib.load(MODELS_DIR / "tyre_wear_predictor.pkl")
 # ============================================================================
 
 # master_zip = PROCESSED_DIR / "master_lap_by_lap.zip"
-master_csv = joblib.load(PROCESSED_DIR / "master_lap_by_lap" / "master_lap_by_lap.csv")
+master_csv = PROCESSED_DIR / "master_lap_by_lap" / "master_lap_by_lap.csv"
 
 if not master_csv.exists():
     st.error(f"Missing processed data: {master_csv}")
@@ -602,6 +602,7 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
 
