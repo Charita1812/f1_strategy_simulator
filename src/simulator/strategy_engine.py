@@ -7,6 +7,7 @@ Real-World F1 Strategy Engine
 """
 
 import os
+import io
 import pandas as pd
 import numpy as np
 import joblib
@@ -188,42 +189,45 @@ MODELS_DIR = os.path.join(ROOT, "models")
 
 class RealWorldStrategyEngine:
     def __init__(self):
-        # --- Load master lap-by-lap data from ZIP ---
+        # --- Load master lap-by-lap CSV directly from ZIP ---
         zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
-        csv_inside_zip = "master_lap_by_lap.csv"  # path inside the zip
+        csv_inside_zip = "master_lap_by_lap/master_lap_by_lap.csv"
 
         if not os.path.exists(zip_path):
             raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
 
-        # Read CSV directly from ZIP using pandas
-        try:
-            self.master = pd.read_csv(f"zip://{zip_path}!{csv_inside_zip}")
-        except Exception as e:
-            raise FileNotFoundError(f"Cannot read CSV inside ZIP: {csv_inside_zip}\n{e}")
+        self.master = pd.read_csv(f"zip://{zip_path}!{csv_inside_zip}")
 
-        # --- Load models safely ---
+        # --- Load models ---
         self.lap_time_model = self._load_model("lap_time_model.pkl")
         self.tyre_model = self._load_model("tyre_wear_predictor.pkl")
         self.pit_model = self._load_model("pit_window_model.pkl")
-        self.sc_model = self._load_model("safety_car_model.pkl", zipped=True)
-        self.undercut_model = self._load_model("undercut_model.pkl", zipped=True)
 
-    def _load_model(self, filename, zipped=False):
-        """
-        Load a model safely. If zipped=True, extract from corresponding zip first.
-        """
-        model_path = os.path.join(MODELS_DIR, filename)
-        if not os.path.exists(model_path) and zipped:
-            zip_file = os.path.join(MODELS_DIR, filename.replace(".pkl", ".zip"))
-            if os.path.exists(zip_file):
-                with zipfile.ZipFile(zip_file, "r") as z:
-                    z.extractall(MODELS_DIR)
-            else:
-                print(f"⚠ Warning: {filename} not found, using fallback.")
-        if os.path.exists(model_path):
+        # Load models inside ZIPs using joblib
+        self.sc_model = self._load_model_from_zip("safety_car_model.zip", "safety_car_model.pkl")
+        self.undercut_model = self._load_model_from_zip("undercut_model.zip", "undercut_model.pkl")
+
+    def _load_model(self, filename):
+        path = os.path.join(MODELS_DIR, filename)
+        if os.path.exists(path):
             print(f"Loading model: {filename}")
-            return joblib.load(model_path)
+            return joblib.load(path)
         else:
+            print(f"⚠ Warning: {filename} not found, using fallback.")
+            return None
+
+    def _load_model_from_zip(self, zip_filename, pkl_filename):
+        zip_path = os.path.join(MODELS_DIR, zip_filename)
+        if not os.path.exists(zip_path):
+            print(f"⚠ Warning: {zip_filename} missing, fallback for {pkl_filename}")
+            return None
+        try:
+            with zipfile.ZipFile(zip_path, 'r') as z:
+                with z.open(pkl_filename) as f:
+                    print(f"Loading model from ZIP: {pkl_filename}")
+                    return joblib.load(f)
+        except Exception as e:
+            print(f"⚠ Error loading {pkl_filename} from {zip_filename}: {e}")
             return None
 
 
@@ -368,6 +372,7 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
 
 
 
