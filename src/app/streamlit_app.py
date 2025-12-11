@@ -487,7 +487,7 @@ st.markdown(
 # ============================================================================
 
 joblib.load(MODELS_DIR / "undercut_model" / "undercut_model.pkl")
-joblib.load(MODELS_DIR / "safety_car_model" / "undercut_model.pkl")
+joblib.load(MODELS_DIR / "safety_car_model" / "safety_car_model.pkl")
 joblib.load(MODELS_DIR / "lap_time_model.pkl")
 joblib.load(MODELS_DIR / "pit_window_model.pkl")
 joblib.load(MODELS_DIR / "tyre_wear_predictor.pkl")
@@ -606,6 +606,7 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
 
