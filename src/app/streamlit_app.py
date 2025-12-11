@@ -497,14 +497,25 @@ joblib.load(MODELS_DIR / "tyre_wear_predictor.pkl")
 # LOAD MASTER DATA
 # ============================================================================
 
-# master_zip = PROCESSED_DIR / "master_lap_by_lap.zip"
-master_csv = PROCESSED_DIR / "master_lap_by_lap" / "master_lap_by_lap.csv"
+# ------------ EXTRACT MASTER DATA ZIP ------------
+MASTER_ZIP = PROCESSED_DIR / "master_lap_by_lap.zip"
+MASTER_DIR = PROCESSED_DIR / "master_lap_by_lap"
+MASTER_CSV = MASTER_DIR / "master_lap_by_lap.csv"
 
-if not master_csv.exists():
-    st.error(f"Missing processed data: {master_csv}")
+# Extract only if not extracted before
+if MASTER_ZIP.exists() and not MASTER_CSV.exists():
+    MASTER_DIR.mkdir(exist_ok=True)
+    import zipfile
+    with zipfile.ZipFile(MASTER_ZIP, 'r') as z:
+        z.extractall(MASTER_DIR)
+
+# Now load CSV
+if not MASTER_CSV.exists():
+    st.error(f"Missing master CSV file: {MASTER_CSV}")
     st.stop()
 
-master = pd.read_csv(master_csv)
+master = pd.read_csv(MASTER_CSV)
+
 
 # ============================================================================ 
 # SIDEBAR CONFIGURATION
@@ -602,6 +613,7 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
 
