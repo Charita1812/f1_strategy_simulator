@@ -13,6 +13,16 @@ import sys
 # ============================================================================
 
 ROOT = Path(__file__).resolve().parents[2]
+def extract_zipped_models():
+    for zip_path in MODELS_DIR.glob("*.zip"):
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(MODELS_DIR)
+
+        # OPTIONAL: delete zip file after extraction
+        # uncomment to avoid accidentally loading zip again
+        # zip_path.unlink()
+
+extract_zipped_models()
 PROCESSED = ROOT / "data" / "processed"
 MODELS_DIR = ROOT / "models"
 ENGINE_PATH = ROOT / "src" / "simulator" / "strategy_engine.py"
@@ -614,3 +624,4 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
