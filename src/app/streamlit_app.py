@@ -13,6 +13,19 @@ PROCESSED_DIR = BASE_DIR / "data" / "processed"
 ENGINE_PATH = BASE_DIR / "src" / "simulator" / "strategy_engine.py"
 
 import sys
+def extract_zipped_models():
+    for zip_file in MODELS_DIR.glob("*.zip"):
+        extract_folder = MODELS_DIR / zip_file.stem
+        
+        # If not extracted yet
+        if not extract_folder.exists():
+            extract_folder.mkdir(exist_ok=True)
+            with zipfile.ZipFile(zip_file, "r") as z:
+                z.extractall(extract_folder)
+
+# Run extraction
+extract_zipped_models()
+
 sys.path.append(str(BASE_DIR / "src"))
 from simulator.strategy_engine import RealWorldStrategyEngine
 
@@ -466,18 +479,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-def extract_zipped_models():
-    for zip_file in MODELS_DIR.glob("*.zip"):
-        extract_folder = MODELS_DIR / zip_file.stem
-        
-        # If not extracted yet
-        if not extract_folder.exists():
-            extract_folder.mkdir(exist_ok=True)
-            with zipfile.ZipFile(zip_file, "r") as z:
-                z.extractall(extract_folder)
 
-# Run extraction
-extract_zipped_models()
 
 
 # ============================================================================ 
@@ -604,5 +606,6 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
