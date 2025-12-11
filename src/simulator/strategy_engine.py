@@ -208,19 +208,20 @@ import pandas as pd
 
 PROCESSED = os.path.join(os.path.dirname(__file__), "..", "data", "processed")
 zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
-csv_path = os.path.join(PROCESSED, "master_lap_by_lap.csv")
+csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")
+csv_path = os.path.join(csv_folder_path, "master_lap_by_lap.csv")
 
-# If CSV doesn't exist, extract from ZIP
+# Step 1: Extract folder if it does not exist
 if not os.path.exists(csv_path):
     if os.path.exists(zip_path):
         with zipfile.ZipFile(zip_path, "r") as z:
-            # Extract CSV into PROCESSED folder
-            z.extract("master_lap_by_lap.csv", PROCESSED)
+            z.extractall(PROCESSED)  # extract the entire folder
     else:
         raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
 
-# Now load CSV normally
+# Step 2: Load CSV
 self.master = pd.read_csv(csv_path)
+
 
 
         # Global fallback pit delta
@@ -361,6 +362,7 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
 
 
 
