@@ -5,30 +5,15 @@ import os
 import joblib
 import zipfile
 from pathlib import Path
-import matplotlib.pyplot as plt
+
+# ---------- FIXED PATHS FOR HUGGING FACE ----------
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+MODELS_DIR = BASE_DIR / "models"
+PROCESSED_DIR = BASE_DIR / "data" / "processed"
+ENGINE_PATH = BASE_DIR / "src" / "simulator" / "strategy_engine.py"
+
 import sys
-
-# ============================================================================ 
-# PATH SETUP
-# ============================================================================
-
-ROOT = Path(__file__).resolve().parents[2]
-def extract_zipped_models():
-    for zip_path in MODELS_DIR.glob("*.zip"):
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(MODELS_DIR)
-
-        # OPTIONAL: delete zip file after extraction
-        # uncomment to avoid accidentally loading zip again
-        # zip_path.unlink()
-
-extract_zipped_models()
-PROCESSED = ROOT / "data" / "processed"
-MODELS_DIR = ROOT / "models"
-ENGINE_PATH = ROOT / "src" / "simulator" / "strategy_engine.py"
-
-# Ensure src is importable
-sys.path.append(str(ROOT / "src"))
+sys.path.append(str(BASE_DIR / "src"))
 from simulator.strategy_engine import RealWorldStrategyEngine
 
 # ============================================================================ 
@@ -481,35 +466,30 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ============================================================================ 
-# UNZIP MODELS (if zipped)
-# ============================================================================
-
-def unzip_models():
-    """Extract zipped models if they exist."""
+def extract_zipped_models():
     for zip_file in MODELS_DIR.glob("*.zip"):
-        with zipfile.ZipFile(zip_file, 'r') as z:
-            z.extractall(MODELS_DIR)
+        extract_folder = MODELS_DIR / zip_file.stem
+        
+        # If not extracted yet
+        if not extract_folder.exists():
+            extract_folder.mkdir(exist_ok=True)
+            with zipfile.ZipFile(zip_file, "r") as z:
+                z.extractall(extract_folder)
 
-unzip_models()  # Run this at startup
+# Run extraction
+extract_zipped_models()
+
 
 # ============================================================================ 
 # LOAD MODELS
 # ============================================================================
 
-@st.cache_resource
-def load_all_models():
-    """Load all models (.pkl) from models directory."""
-    models = {}
-    for model_file in MODELS_DIR.glob("*.pkl"):
-        try:
-            models[model_file.stem] = joblib.load(model_file)
-        except Exception as e:
-            st.error(f"Failed to load model {model_file.name}: {e}")
-            st.stop()
-    return models
+joblib.load(MODELS_DIR / "undercut_model" / "undercut_model.pkl")
+joblib.load(MODELS_DIR / "safety_car_model" / "undercut_model.pkl")
+joblib.load(MODELS_DIR / "lap_time_model.pkl")
+joblib.load(MODELS_DIR / "pit_window_model.pkl")
+joblib.load(MODELS_DIR / "tyre_wear_predictor.pkl")
 
-models = load_all_models()
 
 # ============================================================================ 
 # LOAD MASTER DATA
@@ -624,4 +604,5 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
