@@ -202,11 +202,22 @@ class RealWorldStrategyEngine:
         self.sc_model = self._load_model("safety_car_model.pkl")
         self.undercut_model = self._load_model("undercut_model.pkl")
 
-        # Load master lap-by-lap data
-        master_path = os.path.join(PROCESSED, "master_lap_by_lap.csv")
-        if not os.path.exists(master_path):
-            raise FileNotFoundError(f"{master_path} not found. Run data pipeline first.")
-        self.master = pd.read_csv(master_path)
+        import zipfile
+
+zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
+master_path = os.path.join(PROCESSED, "master_lap_by_lap.csv")
+
+# If CSV does not exist, extract the ZIP file
+if not os.path.exists(master_path):
+    if os.path.exists(zip_path):
+        with zipfile.ZipFile(zip_path, 'r') as z:
+            z.extractall(PROCESSED)
+    else:
+        raise FileNotFoundError(f"No CSV or ZIP found at {PROCESSED}")
+
+# Now load the CSV
+self.master = pd.read_csv(master_path)
+
 
         # Global fallback pit delta
         self.global_pit_delta_s = 20.0
@@ -346,3 +357,4 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
