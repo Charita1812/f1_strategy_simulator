@@ -181,7 +181,6 @@ Real-World F1 Strategy Engine
 - Robust to missing models or columns
 """
 
-# Paths
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PROCESSED = os.path.join(ROOT, "data", "processed")
 MODELS_DIR = os.path.join(ROOT, "models")
@@ -189,23 +188,18 @@ MODELS_DIR = os.path.join(ROOT, "models")
 
 class RealWorldStrategyEngine:
     def __init__(self):
-        # --- Load master lap-by-lap data ---
+        # --- Load master lap-by-lap data from ZIP ---
         zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
-        csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")  # folder inside ZIP
-        csv_path = os.path.join(zip_path, "master_lap_by_lap.csv")
+        csv_inside_zip = "master_lap_by_lap.csv"  # path inside the zip
 
-        # Extract ZIP if folder does not exist
-        if not os.path.exists(csv_path):
-            if os.path.exists(zip_path):
-                with zipfile.ZipFile(zip_path, "r") as z:
-                    z.extractall(PROCESSED)
-                if not os.path.exists(csv_path):
-                    raise FileNotFoundError(f"{csv_path} not found even after extraction.")
-            else:
-                raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
+        if not os.path.exists(zip_path):
+            raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
 
-        # Load CSV
-        self.master = pd.read_csv(csv_path)
+        # Read CSV directly from ZIP using pandas
+        try:
+            self.master = pd.read_csv(f"zip://{zip_path}!{csv_inside_zip}")
+        except Exception as e:
+            raise FileNotFoundError(f"Cannot read CSV inside ZIP: {csv_inside_zip}\n{e}")
 
         # --- Load models safely ---
         self.lap_time_model = self._load_model("lap_time_model.pkl")
@@ -230,7 +224,7 @@ class RealWorldStrategyEngine:
             print(f"Loading model: {filename}")
             return joblib.load(model_path)
         else:
-            return None  # fallback
+            return None
 
 
 
@@ -374,6 +368,7 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
 
 
 
