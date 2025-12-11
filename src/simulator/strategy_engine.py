@@ -203,17 +203,16 @@ class RealWorldStrategyEngine:
         self.undercut_model = self._load_model("undercut_model.pkl")
 
   import os
-import zipfile
-import pandas as pd
+  import zipfile
+  import pandas as pd
+  # Paths
+  PROCESSED = os.path.join(os.path.dirname(__file__), "..", "data", "processed")
+  zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
+  csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")  # folder inside ZIP
+  csv_path = os.path.join(csv_folder_path, "master_lap_by_lap.csv")
 
-# Paths
-PROCESSED = os.path.join(os.path.dirname(__file__), "..", "data", "processed")
-zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
-csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")  # folder inside ZIP
-csv_path = os.path.join(csv_folder_path, "master_lap_by_lap.csv")
-
-# Extract ZIP if folder does not exist
-if not os.path.exists(csv_path):
+  # Extract ZIP if folder does not exist
+  if not os.path.exists(csv_path):
     if os.path.exists(zip_path):
         with zipfile.ZipFile(zip_path, "r") as z:
             z.extractall(PROCESSED)  # will create master_lap_by_lap folder
@@ -222,8 +221,8 @@ if not os.path.exists(csv_path):
     else:
         raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
 
-# Load the CSV
-self.master = pd.read_csv(csv_path)
+  # Load the CSV
+  self.master = pd.read_csv(csv_path)
 
 
 
@@ -366,6 +365,7 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
 
 
 
