@@ -192,7 +192,7 @@ class RealWorldStrategyEngine:
         # --- Load master lap-by-lap data ---
         zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
         csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")  # folder inside ZIP
-        csv_path = os.path.join(csv_folder_path, "master_lap_by_lap.csv")
+        csv_path = os.path.join(zip_path, "master_lap_by_lap.csv")
 
         # Extract ZIP if folder does not exist
         if not os.path.exists(csv_path):
@@ -374,6 +374,7 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
 
 
 
