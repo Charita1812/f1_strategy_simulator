@@ -547,12 +547,23 @@ run_button = st.sidebar.button("🚀 Run Simulation")
 # ============================================================================ 
 # INITIALIZE ENGINE
 # ============================================================================
+#import streamlit as st
+#from simulator.strategy_engine import RealWorldStrategyEngine
 
-@st.cache_resource
+# Cache the engine so it's only loaded once
+@st.cache_resource(show_spinner=False)
 def get_engine():
-    return RealWorldStrategyEngine()
+    try:
+        engine = RealWorldStrategyEngine()
+        return engine
+    except FileNotFoundError as e:
+        st.error(f"Data or models missing: {e}")
+        return None
 
 engine = get_engine()
+if engine is None:
+    st.stop()  # Stop the app if engine failed to load
+
 
 # ============================================================================ 
 # RACE OVERVIEW
@@ -613,6 +624,7 @@ if run_button:
 
 st.markdown("---")
 st.caption("Built with Streamlit • Powered by Machine Learning • Formula 1 Strategy Optimization")
+
 
 
 
