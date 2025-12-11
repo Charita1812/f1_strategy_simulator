@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from typing import List, Dict, Any
+import zipfile
 
 # -------------------------
 # Paths
@@ -180,49 +181,57 @@ Real-World F1 Strategy Engine
 - Robust to missing models or columns
 """
 
-import os
-import pandas as pd
-import numpy as np
-import joblib
-from typing import List, Dict, Any
-
-# -------------------------
 # Paths
-# -------------------------
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PROCESSED = os.path.join(ROOT, "data", "processed")
 MODELS_DIR = os.path.join(ROOT, "models")
 
+
 class RealWorldStrategyEngine:
     def __init__(self):
-        # Load models safely
+        # --- Load master lap-by-lap data ---
+        zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
+        csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")  # folder inside ZIP
+        csv_path = os.path.join(csv_folder_path, "master_lap_by_lap.csv")
+
+        # Extract ZIP if folder does not exist
+        if not os.path.exists(csv_path):
+            if os.path.exists(zip_path):
+                with zipfile.ZipFile(zip_path, "r") as z:
+                    z.extractall(PROCESSED)
+                if not os.path.exists(csv_path):
+                    raise FileNotFoundError(f"{csv_path} not found even after extraction.")
+            else:
+                raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
+
+        # Load CSV
+        self.master = pd.read_csv(csv_path)
+
+        # --- Load models safely ---
         self.lap_time_model = self._load_model("lap_time_model.pkl")
         self.tyre_model = self._load_model("tyre_wear_predictor.pkl")
         self.pit_model = self._load_model("pit_window_model.pkl")
-        self.sc_model = self._load_model("safety_car_model.pkl")
-        self.undercut_model = self._load_model("undercut_model.pkl")
+        self.sc_model = self._load_model("safety_car_model.pkl", zipped=True)
+        self.undercut_model = self._load_model("undercut_model.pkl", zipped=True)
 
-  import os
-  import zipfile
-  import pandas as pd
-  # Paths
-  PROCESSED = os.path.join(os.path.dirname(__file__), "..", "data", "processed")
-  zip_path = os.path.join(PROCESSED, "master_lap_by_lap.zip")
-  csv_folder_path = os.path.join(PROCESSED, "master_lap_by_lap")  # folder inside ZIP
-  csv_path = os.path.join(csv_folder_path, "master_lap_by_lap.csv")
+    def _load_model(self, filename, zipped=False):
+        """
+        Load a model safely. If zipped=True, extract from corresponding zip first.
+        """
+        model_path = os.path.join(MODELS_DIR, filename)
+        if not os.path.exists(model_path) and zipped:
+            zip_file = os.path.join(MODELS_DIR, filename.replace(".pkl", ".zip"))
+            if os.path.exists(zip_file):
+                with zipfile.ZipFile(zip_file, "r") as z:
+                    z.extractall(MODELS_DIR)
+            else:
+                print(f"⚠ Warning: {filename} not found, using fallback.")
+        if os.path.exists(model_path):
+            print(f"Loading model: {filename}")
+            return joblib.load(model_path)
+        else:
+            return None  # fallback
 
-  # Extract ZIP if folder does not exist
-  if not os.path.exists(csv_path):
-    if os.path.exists(zip_path):
-        with zipfile.ZipFile(zip_path, "r") as z:
-            z.extractall(PROCESSED)  # will create master_lap_by_lap folder
-        if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"{csv_path} not found even after extraction.")
-    else:
-        raise FileNotFoundError(f"{zip_path} missing. Run data pipeline first.")
-
-  # Load the CSV
-  self.master = pd.read_csv(csv_path)
 
 
 
@@ -365,6 +374,7 @@ if __name__ == "__main__":
     sample = engine.simulate_strategy(race_id, driver_id, current_lap, total_laps)
     import pprint
     pprint.pprint(sample)
+
 
 
 
